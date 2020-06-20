@@ -712,7 +712,6 @@ public class RNBluetoothClassicModule
    */
   @ReactMethod
   public void setReadObserving(boolean readObserving, Promise promise) {
-    Log.d("in setReadObs", String.valueOf(readObserving));
     mReadObserving.set(readObserving);
     promise.resolve(true);
   }
