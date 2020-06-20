@@ -562,7 +562,7 @@ public class RNBluetoothClassicModule
    */
   @ReactMethod
   public void cancelAccept(Promise promise) {
-    if (mBluetoothAdapter == null || mBluetoothAdapter.isEnabled()) {
+    if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) { //changed here
       promise.reject(new IllegalStateException("Bluetooth is not currently enabled"));
     } else if (mAcceptPromise == null) {
       promise.resolve(null);
@@ -712,7 +712,8 @@ public class RNBluetoothClassicModule
    */
   @ReactMethod
   public void setReadObserving(boolean readObserving, Promise promise) {
-    this.mReadObserving.set(readObserving);
+    Log.d("in setReadObs", String.valueOf(readObserving));
+    mReadObserving.set(readObserving);
     promise.resolve(true);
   }
 
@@ -826,14 +827,13 @@ public class RNBluetoothClassicModule
     Log.d(TAG, msg);
 
     mBuffer.append(new String(data, mCharset));
-
     if (!mReadObserving.get()) {
       Log.d(TAG, "No BTEvent.READ listeners are registered, skipping handling of the event");
       return;
     }
 
     String message;
-    while ((message = readUntil(this.mDelimiter)) != null) {
+    while ((message = readData()) != null) {
       BluetoothMessage bluetoothMessage
               = new BluetoothMessage<>(new NativeDevice(mBluetoothService.connectedDevice()).map(), message);
       sendEvent(BluetoothEvent.READ.code, bluetoothMessage.asMap());
@@ -855,6 +855,23 @@ public class RNBluetoothClassicModule
       data = mBuffer.substring(0, len);
       mBuffer.delete(0, len);
     }
+    return data;
+  }
+
+  /**
+   * Attempts to read from to the first (or if none end) delimiter.  If the delimiter is found
+   * then the data is retrieved and removed from the buffer.
+   *
+   * @return the data up to the next delimiter
+   */
+   private String readData() {
+    if (D) Log.d(TAG, "Read");
+    int length = mBuffer.length();
+    if (length == 0) {
+      return null;
+    }
+    String data = mBuffer.substring(0, length);
+    mBuffer.delete(0, length);
     return data;
   }
 
