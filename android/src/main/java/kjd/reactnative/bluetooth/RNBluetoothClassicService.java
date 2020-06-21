@@ -457,7 +457,7 @@ public class RNBluetoothClassicService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[16384]; //16384
             int bytes;
 
             // The device will continue attempting to read until there is an IOException thrown
@@ -468,8 +468,7 @@ public class RNBluetoothClassicService {
                     bytes = mmInStream.read(buffer);
                     if (bytes > 0)
                         listener.onReceivedData(mmDevice, Arrays.copyOf(buffer, bytes));
-
-                    Thread.sleep(100);      // Pause 
+                    // Thread.sleep(100);      // Pause 
                 } catch (Exception e) {
                     Log.e(TAG, "Disconnected - was it cancelled? " + mmCancelled, e);
 
